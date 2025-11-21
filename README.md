@@ -6,7 +6,11 @@
 
 **The bottom line:** Everything works out of the box.
 
-## Quick Start
+**Why it matters:** Get Harper running with monitoring in under a minute.
+
+**The bottom line:** Everything works out of the box ✅
+
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/yourusername/harper-tools.git
@@ -15,7 +19,7 @@ docker-compose up -d
 ```
 
 **Harper:** http://localhost:9925 (admin/HarperRocks!)
-**Grafana:** http://localhost:3000 (admin/admin)
+**Grafana:** http://localhost:3000 (admin/HarperRocks!) 📊
 
 ## What's Included
 
