@@ -1,6 +1,6 @@
-# HarperDB Docker Monitoring Stack
+# Harper Docker Monitoring Stack
 
-A Docker Compose setup for running HarperDB with Grafana monitoring dashboards.
+A Docker Compose setup for running Harper with Grafana monitoring dashboards.
 
 ## Quick Start
 
@@ -24,40 +24,33 @@ docker-compose --profile cluster up -d
 ```
 .
 ├── docker-compose.yml           # Main orchestration file
-├── grafana/                     # Grafana configuration
-│   └── provisioning/
-│       ├── dashboards/         # Dashboard JSON files
-│       └── datasources/        # Datasource configurations
-├── harperdb/                   # HarperDB configuration
-│   └── config.yaml             # HarperDB settings
+├── .env.example                 # Environment variables template
+├── scripts/                     # Utility scripts
+│   └── setup-grafana.sh        # Grafana dashboard setup script
+├── data/                       # Transient data for Docker containers (auto-created)
+│   ├── harper/                 # Harper single node data
+│   ├── harper-node-0/          # Cluster node 0 data
+│   ├── harper-node-1/          # Cluster node 1 data
+│   ├── harper-node-2/          # Cluster node 2 data
+│   └── grafana/                # Grafana data
 ├── docs/                       # Documentation
-│   ├── README.md               # Detailed documentation
-│   ├── SCRIPTS_GUIDE.md        # Scripts reference
-│   └── TROUBLESHOOTING.md      # Common issues & solutions
-└── scripts/                    # Utility scripts
-    ├── setup/                  # Initial setup scripts
-    ├── testing/                # Test and debug scripts
-    ├── queries/                # HarperDB query utilities
-    └── fixes/                  # Dashboard fix utilities
+│   └── DATA-FORMAT-ANALYSIS.md # Harper data format documentation
+├── README.md                   # This file
+└── USAGE_GUIDE.md              # Detailed usage instructions
 ```
 
 ## Documentation
 
-- **[Full Documentation](docs/README.md)** - Complete project documentation
-- **[Scripts Guide](docs/SCRIPTS_GUIDE.md)** - How to use utility scripts
-- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and fixes
-
-## Current Status
-
-⚠️ **Known Issue**: Multi-node display showing "missing time field" errors with Infinity datasource. See [Troubleshooting](docs/TROUBLESHOOTING.md) for workarounds.
+- **[Usage Guide](USAGE_GUIDE.md)** - Detailed usage instructions
+- **[Data Format Analysis](docs/DATA-FORMAT-ANALYSIS.md)** - Understanding Harper data formats
 
 ## Services
 
-### HarperDB
+### Harper
 - **Single Node**: http://localhost:9925
 - **Cluster Node 0**: http://localhost:9925
-- **Cluster Node 1**: http://localhost:9926
-- **Cluster Node 2**: http://localhost:9927
+- **Cluster Node 1**: http://localhost:9935
+- **Cluster Node 2**: http://localhost:9945
 - **Credentials**: admin / HarperRocks!
 
 ### Grafana
@@ -68,4 +61,8 @@ docker-compose --profile cluster up -d
 
 - Docker & Docker Compose
 - 4GB+ RAM for cluster mode
-- Ports 3000, 9925-9927 available
+- Available ports:
+  - 3000 (Grafana)
+  - 9925, 9926 (Harper single node or cluster node 0)
+  - 9935, 9936 (Harper cluster node 1)
+  - 9945, 9946 (Harper cluster node 2)

@@ -273,7 +273,7 @@ services:
     image: alpine:latest
     container_name: grafana-setup
     volumes:
-      - ./scripts/setup/setup-grafana.sh:/app/setup-grafana.sh:ro
+      - ./scripts/setup-grafana.sh:/app/setup-grafana.sh:ro
     networks:
       harper-net:
         ipv4_address: 172.20.0.21
