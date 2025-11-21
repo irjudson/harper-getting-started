@@ -1,0 +1,8 @@
+# Environment variables (contains credentials)
+.env
+
+# Data directories
+data/
+
+# Test logs (if any)
+*.log

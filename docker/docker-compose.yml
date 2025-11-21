@@ -1,0 +1,291 @@
+name: harper-dev
+
+services:
+  harper-0:
+    profiles: ["single", ""]
+    image: harperdb/harperdb:latest
+    container_name: harper-0
+    hostname: harper-0
+    volumes:
+      - ./data/harper:/home/harperdb/hdb
+    ports:
+      - "9925:9925"
+      - "9926:9926"
+    environment:
+      TC_AGREEMENT: "yes"
+      HDB_ADMIN_USERNAME: "${HDB_ADMIN_USERNAME:-admin}"
+      HDB_ADMIN_PASSWORD: "${HDB_ADMIN_PASSWORD:-HarperRocks!}"
+      ROOTPATH: "/home/harperdb/hdb"
+    networks:
+      harper-net:
+        ipv4_address: 172.20.0.30
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.20.0.30:9925/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    hostname: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: "admin"
+      GF_SECURITY_ADMIN_PASSWORD: "HarperRocks!"
+      GF_PLUGINS_PREINSTALL: "harperfast-harper-datasource"
+      GF_USERS_HOME_PAGE: "d/harper-monitoring"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_AUTH_BASIC_ENABLED: "true"
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: "30s"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    networks:
+      harper-net:
+        ipv4_address: 172.20.0.20
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://172.20.0.20:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  harper-node-0:
+    profiles: ["cluster"]
+    image: harperdb/harperdb:latest
+    container_name: harper-0
+    hostname: harper-0
+    volumes:
+      - ./data/harper-node-0:/home/harperdb/hdb
+    environment:
+      TC_AGREEMENT: "yes"
+      HDB_ADMIN_USERNAME: "admin"
+      HDB_ADMIN_PASSWORD: "HarperRocks!"
+      ROOTPATH: "/home/harperdb/hdb"
+      ANALYTICS_REPLICATE: "true"
+      
+      REPLICATION_HOSTNAME: "harper-0"
+
+      HARPER_SET_CONFIG: '{
+          "operationsApi": {
+            "network": {
+              "port": "0.0.0.0:9925",
+              "securePort": null
+            }
+          },
+          "http": {
+            "port": 9926,
+            "securePort": null,
+            "threads": 2
+          },
+          "replication": {
+            "hostname": "harper-0",
+            "port": "0.0.0.0:9933",
+            "routes": [
+            "ws://172.20.0.30:9933",
+            "ws://172.20.0.31:9933",
+            "ws://172.20.0.32:9933"
+            ]
+          },
+          "threads": {
+            "count": 2
+          },
+          "logging": {
+            "level": "info",
+            "stdStreams": true
+          },
+          "authentication": {
+            "operationsApi": {
+              "username": "admin",
+              "password": "HarperRocks!"
+            }
+          }
+        }'
+    ports:
+      - "9925:9925"
+      - "9926:9926"
+    networks:
+      harper-net:
+        ipv4_address: 172.20.0.30
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://172.20.0.30:9925/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  harper-node-1:
+    profiles: ["cluster"]
+    image: harperdb/harperdb:latest
+    container_name: harper-1
+    hostname: harper-1
+    volumes:
+      - ./data/harper-1:/home/harperdb/hdb
+    environment:
+      TC_AGREEMENT: "yes"
+      HDB_ADMIN_USERNAME: "admin"
+      HDB_ADMIN_PASSWORD: "HarperRocks!"
+      ROOTPATH: "/home/harperdb/hdb"
+      ANALYTICS_REPLICATE: "true"
+
+      HDB_LEADER_URL: "http://172.20.0.30:9925"
+      HDB_LEADER_USERNAME: "admin"
+      HDB_LEADER_PASSWORD: "HarperRocks!"
+      REPLICATION_HOSTNAME: "harper-1"
+
+      HARPER_SET_CONFIG: '{
+          "operationsApi": {
+            "network": {
+              "port": "0.0.0.0:9925",
+              "securePort": null
+            }
+          },
+          "http": {
+            "port": 9926,
+            "securePort": null,
+            "threads": 2
+          },
+          "replication": {
+            "hostname": "harper-1",
+            "port": "0.0.0.0:9933",
+            "routes": [            
+              "ws://172.20.0.30:9933",
+              "ws://172.20.0.31:9933",
+              "ws://172.20.0.32:9933"
+            ]
+          },
+          "threads": {
+            "count": 2
+          },
+          "logging": {
+            "level": "info",
+            "stdStreams": true
+          },
+          "authentication": {
+            "operationsApi": {
+              "username": "admin",
+              "password": "HarperRocks!"
+            }
+          }
+        }'
+    ports:
+      - "9935:9925"
+      - "9936:9926"
+    networks:
+      harper-net:
+        ipv4_address: 172.20.0.31
+    depends_on:
+      harper-node-0:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.20.0.31:9925/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  harper-node-2:
+    profiles: ["cluster"]
+    image: harperdb/harperdb:latest
+    container_name: harper-2
+    hostname: harper-2
+    volumes:
+      - ./data/harper-2:/home/harperdb/hdb
+    environment:
+      TC_AGREEMENT: "yes"
+      HDB_ADMIN_USERNAME: "admin"
+      HDB_ADMIN_PASSWORD: "HarperRocks!"
+      ROOTPATH: "/home/harperdb/hdb"
+      ANALYTICS_REPLICATE: "true"
+
+      HDB_LEADER_URL: "http://172.20.0.30:9925"
+      HDB_LEADER_USERNAME: "admin"
+      HDB_LEADER_PASSWORD: "HarperRocks!"
+      REPLICATION_HOSTNAME: "harper-2"
+
+      HARPER_SET_CONFIG: '{
+          "operationsApi": {
+            "network": {
+              "port": "0.0.0.0:9925",
+              "securePort": null
+            }
+          },
+          "http": {
+            "port": 9926,
+            "securePort": null,
+            "threads": 2
+          },
+          "replication": {
+            "hostname": "harper-2",
+            "port": "0.0.0.0:9933",
+            "routes": [            
+              "ws://172.20.0.30:9933",
+              "ws://172.20.0.31:9933",
+              "ws://172.20.0.32:9933"
+            ]
+          },
+          "threads": {
+            "count": 2
+          },
+          "logging": {
+            "level": "info",
+            "stdStreams": true
+          },
+          "authentication": {
+            "operationsApi": {
+              "username": "admin",
+              "password": "HarperRocks!"
+            }
+          }
+        }'
+    ports:
+      - "9945:9925"
+      - "9946:9926"
+    networks:
+      harper-net:
+        ipv4_address: 172.20.0.32
+    depends_on:
+      harper-node-0:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.20.0.32:9925/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  grafana-setup:
+    profiles: ["cluster", "single", ""]
+    image: alpine:latest
+    container_name: grafana-setup
+    volumes:
+      - ./scripts/setup/setup-grafana.sh:/app/setup-grafana.sh:ro
+    networks:
+      harper-net:
+        ipv4_address: 172.20.0.21
+    depends_on:
+      grafana:
+        condition: service_healthy
+    command: sh -c "apk add --no-cache curl bash && bash /app/setup-grafana.sh"
+    restart: "no"
+
+networks:
+  harper-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
