@@ -7,7 +7,7 @@ services:
     container_name: harper-0
     hostname: harper-0
     volumes:
-      - ./data/harper:/home/harperdb/hdb
+      - harper-0-storage:/home/harperdb/hdb
     ports:
       - "9925:9925"
       - "9926:9926"
@@ -18,9 +18,9 @@ services:
       ROOTPATH: "/home/harperdb/hdb"
     networks:
       harper-net:
-        ipv4_address: 172.20.0.30
+        ipv4_address: 172.21.0.30
     healthcheck:
-      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.20.0.30:9925/health"]
+      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.21.0.30:9925/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,10 +30,10 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
+    container_name: grafana-harper
     hostname: grafana
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
       GF_SECURITY_ADMIN_USER: "admin"
       GF_SECURITY_ADMIN_PASSWORD: "HarperRocks!"
@@ -45,12 +45,12 @@ services:
       GF_SECURITY_ALLOW_EMBEDDING: "true"
       GF_DASHBOARDS_MIN_REFRESH_INTERVAL: "30s"
     volumes:
-      - ./data/grafana:/var/lib/grafana
+      - grafana-storage:/var/lib/grafana
     networks:
       harper-net:
-        ipv4_address: 172.20.0.20
+        ipv4_address: 172.21.0.20
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://172.20.0.20:3000/api/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://172.21.0.20:3000/api/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -64,7 +64,7 @@ services:
     container_name: harper-0
     hostname: harper-0
     volumes:
-      - ./data/harper-node-0:/home/harperdb/hdb
+      - harper-node-0-storage:/home/harperdb/hdb
     environment:
       TC_AGREEMENT: "yes"
       HDB_ADMIN_USERNAME: "admin"
@@ -90,9 +90,9 @@ services:
             "hostname": "harper-0",
             "port": "0.0.0.0:9933",
             "routes": [
-            "ws://172.20.0.30:9933",
-            "ws://172.20.0.31:9933",
-            "ws://172.20.0.32:9933"
+            "ws://172.21.0.30:9933",
+            "ws://172.21.0.31:9933",
+            "ws://172.21.0.32:9933"
             ]
           },
           "threads": {
@@ -114,9 +114,9 @@ services:
       - "9926:9926"
     networks:
       harper-net:
-        ipv4_address: 172.20.0.30
+        ipv4_address: 172.21.0.30
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://172.20.0.30:9925/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://172.21.0.30:9925/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -130,7 +130,7 @@ services:
     container_name: harper-1
     hostname: harper-1
     volumes:
-      - ./data/harper-1:/home/harperdb/hdb
+      - harper-node-1-storage:/home/harperdb/hdb
     environment:
       TC_AGREEMENT: "yes"
       HDB_ADMIN_USERNAME: "admin"
@@ -138,7 +138,7 @@ services:
       ROOTPATH: "/home/harperdb/hdb"
       ANALYTICS_REPLICATE: "true"
 
-      HDB_LEADER_URL: "http://172.20.0.30:9925"
+      HDB_LEADER_URL: "http://172.21.0.30:9925"
       HDB_LEADER_USERNAME: "admin"
       HDB_LEADER_PASSWORD: "HarperRocks!"
       REPLICATION_HOSTNAME: "harper-1"
@@ -159,9 +159,9 @@ services:
             "hostname": "harper-1",
             "port": "0.0.0.0:9933",
             "routes": [            
-              "ws://172.20.0.30:9933",
-              "ws://172.20.0.31:9933",
-              "ws://172.20.0.32:9933"
+              "ws://172.21.0.30:9933",
+              "ws://172.21.0.31:9933",
+              "ws://172.21.0.32:9933"
             ]
           },
           "threads": {
@@ -183,12 +183,12 @@ services:
       - "9936:9926"
     networks:
       harper-net:
-        ipv4_address: 172.20.0.31
+        ipv4_address: 172.21.0.31
     depends_on:
       harper-node-0:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.20.0.31:9925/health"]
+      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.21.0.31:9925/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -202,7 +202,7 @@ services:
     container_name: harper-2
     hostname: harper-2
     volumes:
-      - ./data/harper-2:/home/harperdb/hdb
+      - harper-node-2-storage:/home/harperdb/hdb
     environment:
       TC_AGREEMENT: "yes"
       HDB_ADMIN_USERNAME: "admin"
@@ -210,7 +210,7 @@ services:
       ROOTPATH: "/home/harperdb/hdb"
       ANALYTICS_REPLICATE: "true"
 
-      HDB_LEADER_URL: "http://172.20.0.30:9925"
+      HDB_LEADER_URL: "http://172.21.0.30:9925"
       HDB_LEADER_USERNAME: "admin"
       HDB_LEADER_PASSWORD: "HarperRocks!"
       REPLICATION_HOSTNAME: "harper-2"
@@ -231,9 +231,9 @@ services:
             "hostname": "harper-2",
             "port": "0.0.0.0:9933",
             "routes": [            
-              "ws://172.20.0.30:9933",
-              "ws://172.20.0.31:9933",
-              "ws://172.20.0.32:9933"
+              "ws://172.21.0.30:9933",
+              "ws://172.21.0.31:9933",
+              "ws://172.21.0.32:9933"
             ]
           },
           "threads": {
@@ -255,12 +255,12 @@ services:
       - "9946:9926"
     networks:
       harper-net:
-        ipv4_address: 172.20.0.32
+        ipv4_address: 172.21.0.32
     depends_on:
       harper-node-0:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.20.0.32:9925/health"]
+      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "http://172.21.0.32:9925/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -276,7 +276,7 @@ services:
       - ./scripts/setup-grafana.sh:/app/setup-grafana.sh:ro
     networks:
       harper-net:
-        ipv4_address: 172.20.0.21
+        ipv4_address: 172.21.0.21
     depends_on:
       grafana:
         condition: service_healthy
@@ -288,4 +288,11 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.21.0.0/16
+
+volumes:
+  grafana-storage: {}
+  harper-0-storage: {}
+  harper-node-0-storage: {}
+  harper-node-1-storage: {}
+  harper-node-2-storage: {}

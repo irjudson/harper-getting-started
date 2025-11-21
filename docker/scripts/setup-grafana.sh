@@ -6,7 +6,7 @@ echo ""
 
 # Wait for harper to be ready
 echo "1. Waiting for harper to be ready..."
-until curl -s http://172.20.0.30:9925 > /dev/null 2>&1; do
+until curl -s http://172.21.0.30:9925 > /dev/null 2>&1; do
   sleep 2
 done
 echo "   ✓ harper is ready"
@@ -20,25 +20,25 @@ echo ""
 
 # Delete and Recreate Harper Data Source
 echo "3. Deleting existing Harper datasource if it exists..."
-curl -s -X DELETE "http://172.20.0.20:3000/api/datasources/uid/harper" \
+curl -s -X DELETE "http://172.21.0.20:3000/api/datasources/uid/harper" \
   -u "admin:HarperRocks!" \
   -H "Content-Type: application/json" 2>/dev/null || true
 
 echo ""
 echo "4. Creating harper datasource via API..."
-RESPONSE=$(curl -s -X POST "http://172.20.0.20:3000/api/datasources" \
+RESPONSE=$(curl -s -X POST "http://172.21.0.20:3000/api/datasources" \
   -u "admin:HarperRocks!" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Harper",
     "type": "harperfast-harper-datasource",
     "uid": "harper",
-    "url": "http://172.20.0.30:9925",
+    "url": "http://172.21.0.30:9925",
     "access": "proxy",
     "isDefault": true,
     "jsonData": {
-      "opsAPIURL": "http://172.20.0.30:9925",
-      "url": "http://172.20.0.30:9925",
+      "opsAPIURL": "http://172.21.0.30:9925",
+      "url": "http://172.21.0.30:9925",
       "username": "admin"
     },
     "secureJsonData": {
@@ -53,7 +53,7 @@ echo "✅ Datasource configured!"
 # Create the Dashboard
 echo "5. Creating harper monitoring dashboard..."
 
-curl -s -X POST "http://172.20.0.20:3000/api/dashboards/db" \
+curl -s -X POST "http://172.21.0.20:3000/api/dashboards/db" \
   -u "admin:HarperRocks!" \
   -H "Content-Type: application/json" \
   -d '{
@@ -63,8 +63,9 @@ curl -s -X POST "http://172.20.0.20:3000/api/dashboards/db" \
     "tags": ["harper", "monitoring", "performance"],
     "timezone": "browser",
     "schemaVersion": 39,
-    "refresh": "5s",
-    "time": {"from": "now-5m", "to": "now"},
+    "refresh": "30s",
+    "time": {"from": "now-1h", "to": "now"},
+    "hideTimepicker": true,
     "panels": [
       {
         "id": 1, "type": "gauge", "title": "CPU Utilization",
