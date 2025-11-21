@@ -123,7 +123,7 @@ All variables have defaults in `docker-compose.yml` using `${VAR:-default}` synt
 ### Directory Structure
 
 ```
-harper-tools/
+harper-getting-started/
 ├── docs/
 │   └── plans/
 │       └── 2025-11-18-harperdb-docker-compose-design.md

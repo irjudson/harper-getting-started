@@ -1,4 +1,4 @@
-# Harper Tools
+# Harper Getting Started
 
 **What it is:** Batteries-included developer toolbox for Harper.
 
@@ -9,8 +9,8 @@
 ## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/yourusername/harper-tools.git
-cd harper-tools/docker
+git clone https://github.com/yourusername/harper-getting-started.git
+cd harper-getting-started/docker
 docker-compose up -d
 ```
 
