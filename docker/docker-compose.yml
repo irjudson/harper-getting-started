@@ -2,7 +2,7 @@ name: harper-dev
 
 services:
   harper-0:
-    profiles: ["single", ""]
+    profiles: ["single", "single-instance", "", "single-no-grafana"]
     image: harperdb/harperdb:latest
     container_name: harper-0
     hostname: harper-0
@@ -29,6 +29,7 @@ services:
     stop_grace_period: 30s
 
   grafana:
+    profiles: ["single", "single-instance", "", "cluster", "cluster-of-three-instances-with-replication"]
     image: grafana/grafana:latest
     container_name: grafana-harper
     hostname: grafana
@@ -59,7 +60,7 @@ services:
     stop_grace_period: 30s
 
   harper-node-0:
-    profiles: ["cluster"]
+    profiles: ["cluster", "cluster-of-three-instances-with-replication", "cluster-no-grafana"]
     image: harperdb/harperdb:latest
     container_name: harper-0
     hostname: harper-0
@@ -124,7 +125,7 @@ services:
     stop_grace_period: 30s
 
   harper-node-1:
-    profiles: ["cluster"]
+    profiles: ["cluster", "cluster-of-three-instances-with-replication", "cluster-no-grafana"]
     image: harperdb/harperdb:latest
     container_name: harper-1
     hostname: harper-1
@@ -195,7 +196,7 @@ services:
     stop_grace_period: 30s
 
   harper-node-2:
-    profiles: ["cluster"]
+    profiles: ["cluster", "cluster-of-three-instances-with-replication", "cluster-no-grafana"]
     image: harperdb/harperdb:latest
     container_name: harper-2
     hostname: harper-2
@@ -266,7 +267,7 @@ services:
     stop_grace_period: 30s
 
   grafana-setup:
-    profiles: ["cluster", "single", ""]
+    profiles: ["cluster", "cluster-of-three-instances-with-replication", "single", "single-instance", ""]
     image: alpine:latest
     container_name: grafana-setup
     volumes:
